@@ -1,94 +1,37 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.ImageObserver;
+import java.io.*;
 import javax.swing.*;
 //import java.applet.*;
 
-public class TicTacToe /*implements ActionListener*/{
-        final static boolean RIGHT_TO_LEFT = true;
-        public static void createWindow(){
-                JFrame window = new JFrame("TicTacToe");
-                Image icon= new ImageIcon("TTTicon.png").getImage();
-                window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                window.setSize(450, 450);
-                window.setIconImage(icon);
-                //window.setResizable(false);
-                addComponentPane(window.getContentPane());
-
-                window.pack();
-                window.setVisible(true);
-        }
-
-        public static void addComponentPane(Container pane){
-          
-                pane.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-                pane.setLayout(new GridBagLayout());
+public class TicTacToe extends JComponent/*implements ActionListener*/{
+        @Override
+        protected void paintComponent(Graphics graph){
+                int size = 3;
+                int w = getWidth();
+                int h = getHeight();
                 
-                GridBagConstraints c = new GridBagConstraints();
-
-                JButton cell = new JButton();
-                c.fill = GridBagConstraints.BOTH;
-                c.gridx=0;
-                c.gridy=0;
-                c.weightx = 1;
-	        c.weighty = 1;
-                c.gridwidth = 3;
-                pane.add(cell, c);
-
-                JButton cell1 = new JButton("1");
-                c.gridx=0;
-                c.gridy=1;
-                c.gridwidth = 1;
-                pane.add(cell1, c);
-
-                JButton cell2 = new JButton("2");
-                c.gridx=1;
-                c.gridy=1;
-                pane.add(cell2, c);
-
-                JButton cell3 = new JButton("3");
-                c.gridx=2;
-                c.gridy=1;
-                pane.add(cell3, c);
-
-                JButton cell4 = new JButton("4");
-                c.gridx=0;
-                c.gridy=2;
-                pane.add(cell4, c);
-
-                JButton cell5 = new JButton("5");
-                c.gridx=1;
-                c.gridy=2;
-                pane.add(cell5, c);
-
-                JButton cell6 = new JButton("6");
-                c.gridx=2;
-                c.gridy=2;
-                pane.add(cell6, c);
-
-                JButton cell7 = new JButton("7");
-                c.gridx=0;
-                c.gridy=3;
-                pane.add(cell7, c);
-
-                JButton cell8 = new JButton("8");
-                c.gridx=1;
-                c.gridy=3;
-                pane.add(cell8, c);
-
-                JButton cell9 = new JButton("9");
-                c.gridx=2;
-                c.gridy=3;
-                pane.add(cell9, c);
+                int f = h/6;
+                int x = w/size;
+                int y = (h-f)/size;
+                int space = 10;
+                super.paintComponent(graph);
+                graph.setColor(Color.BLUE);
+                for(int i=1; i<size; i++){
+                        graph.drawLine(x*i, f+space, x*i, h-space);
+                        graph.drawLine(space, f+y*i, w-space, f+y*i);
+                }
+                /*System.out.println("x="+x);
+                System.out.println("y="+y);
+                System.out.println("w="+w);
+                System.out.println("h="+h);
+                System.out.println("f="+f);
+                */
+                //Image icon= new ImageIcon("Zero.png").getImage();
+               // graph.drawImage(icon, 20, 20, null, icon);
         }
-      
-        public static void main(String[] args){   
-                SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                                createWindow();
-                        }
-                });
-                
-        }
+       
 } 
 
       
