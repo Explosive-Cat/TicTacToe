@@ -1,20 +1,24 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.ImageObserver;
-import java.io.*;
 import javax.swing.*;
-//import java.applet.*;
+import java.io.*;
 
-public class TicTacToe extends JComponent/*implements ActionListener*/{
+
+public class TicTacToe extends JComponent{
         public static final int FIELD_EMPTY = 0;
         public static final int FIELD_X = 1;
         public static final int FIELD_O = -1;
-        public static final int size = 5;
+        public static final int size = 3;
+        public static final int IMAGE_SIZE = 128;
+        int full;
         int[][] field;
+        int[] whowin;
         boolean isXturn;
         public TicTacToe(){
                 enableEvents(AWTEvent.MOUSE_EVENT_MASK);
                 field = new int[size][size];
+                whowin = new int[2*size+2];
+                full = 0;
                 initGame();
         }
 
@@ -24,46 +28,70 @@ public class TicTacToe extends JComponent/*implements ActionListener*/{
                                 field[i][j]= FIELD_EMPTY;
                         }
                 }
+                for(int i=0; i<2*size+2;i++){
+                        whowin[i] = FIELD_EMPTY;
+                }
+                full = 0;
                 isXturn = true;
         }
 
         @Override
         protected void processMouseEvent(MouseEvent mouseEvent){
                 super.processMouseEvent(mouseEvent);
-                int x;
-                int y;
                 if(mouseEvent.getButton() == MouseEvent.BUTTON1){
+                        int x;
+                        int y;
+                        int win;   
                         x = mouseEvent.getX();
-                        y = mouseEvent.getY();
+                        y = mouseEvent.getY()-getHeight()/6;
                 
-                int i = (int)((float)x/getWidth()*size);
-                int j = ((int)((float)y/getHeight()*size));
-                if(field[i][j] == FIELD_EMPTY){
-                        field[i][j] = isXturn?FIELD_X:FIELD_O;
-                        isXturn = !isXturn;
-                        repaint();
-                }
+                        int i = (int)((float)x/getWidth()*size);
+                        int j = ((int)((float)y/(getHeight()*5/6)*size));
+                        if(field[i][j] == FIELD_EMPTY){
+                                field[i][j] = isXturn?FIELD_X:FIELD_O;    
+                                isXturn = !isXturn;
+                                full++;
+                                repaint();
+
+                                win = endGame(i, j);
+                                if(win != 0){
+                                        if(win == 3){
+                                                JOptionPane.showMessageDialog(this, "X win!", "Win!", JOptionPane.INFORMATION_MESSAGE);
+                                        }else if(win == -3){
+                                                JOptionPane.showMessageDialog(this, "O win!", "Win!", JOptionPane.INFORMATION_MESSAGE);
+                                        }else {
+                                                JOptionPane.showMessageDialog(this, "draw", "Draw!", JOptionPane.INFORMATION_MESSAGE);
+                                        }
+                                        initGame();
+                                        repaint();
+                                }
+                                
+
+                        }
                 }
         }
 
         void drawX(int x, int y, Graphics graph){
-                graph.setColor(Color.RED);
+                //graph.setColor(Color.RED);
                 int w = getWidth();
-                int h = getHeight();
-                int f = h/6;
+                int h = getHeight()*5/6;
+                int f = getHeight()/6;
                 int space = ((h>w)?w:h)/30;
-                //graph.imageUpdate(null, y, x, y, x, y)
-                graph.drawLine(x*w/size+space, y*h/size+f+space, (x+1)*w/size-space, (y+1)*h/size+f-space);
-                graph.drawLine(x*w/size+space, (y+1)*h/size+f-space, (x+1)*w/size-space, y*h/size+f+space);
+                Image icon= new ImageIcon("Cross.png").getImage();
+                graph.drawImage(icon, x*w/size+space, y*h/size+f+space, (x+1)*w/size-space, (y+1)*h/size+f-space, 0, 0, IMAGE_SIZE, IMAGE_SIZE, null);
+                //graph.drawLine(x*w/size+space, y*h/size+f+space, (x+1)*w/size-space, (y+1)*h/size+f-space);
+                //graph.drawLine(x*w/size+space, (y+1)*h/size+f-space, (x+1)*w/size-space, y*h/size+f+space);
         }
 
         void drawO(int x, int y, Graphics graph){
-                graph.setColor(Color.BLUE);
+               // graph.setColor(Color.blue);
                 int w = getWidth();
-                int h = getHeight();
-                int f = h/6;
+                int h = getHeight()*5/6;
+                int f = getHeight()/6;
                 int space = ((h>w)?w:h)/30;
-                graph.drawOval((int)(x+0.5)*w/size, (int)(y+0.5)*h/size+f, w/size-space, h/size-space);
+                Image icon= new ImageIcon("Zero.png").getImage();
+                graph.drawImage(icon, x*w/size+space, y*h/size+f+space, (x+1)*w/size-space, (y+1)*h/size+f-space, 0, 0, IMAGE_SIZE, IMAGE_SIZE, null);
+                //graph.drawOval((int)(x+0.5)*w/size+space/2, (int)(y+0.5)*h/size+space/2+f, w/size-space, h/size-space);
         }
 
         void drawXO(Graphics graph){
@@ -78,12 +106,50 @@ public class TicTacToe extends JComponent/*implements ActionListener*/{
                 }
         }
 
+        void drawTurn(Graphics graph){
+                int x = getWidth();
+                int y = getHeight()/6;
+                if(isXturn){
+                        Image icon= new ImageIcon("Cross.png").getImage();
+                        graph.drawImage(icon, x/2-y*4/10, y/10, x/2+y*4/10,  y*8/10, 0, 0, IMAGE_SIZE, IMAGE_SIZE, null);
+                } else{
+                        Image icon= new ImageIcon("Zero.png").getImage();
+                        graph.drawImage(icon, x/2-y*4/10, y/10, x/2+y*4/10,  y*8/10, 0, 0, IMAGE_SIZE, IMAGE_SIZE, null);
+                }
+        }
+
+        int endGame(int i, int j){          
+                whowin[i] += !isXturn?FIELD_X:FIELD_O;
+                whowin[size+j] += !isXturn?FIELD_X:FIELD_O;
+                if(i == j){
+                        whowin[2*size] += !isXturn?FIELD_X:FIELD_O;
+                        if(whowin[2*size] == 3 || whowin[2*size+1] == -3){
+                                return whowin[2*size+1];
+                        }
+                }
+                if(i+j== size-1){
+                        whowin[2*size+1] += !isXturn?FIELD_X:FIELD_O;
+                        if(whowin[2*size+1] == 3 || whowin[2*size+2] == -3){
+                                return whowin[2*size+2];
+                        }
+                }
+                for(int k=0; k<2*size+2; k++){
+                        if(whowin[k] == 3 || whowin[k] == -3)
+                       // System.out.println(whowin[k]);
+                        return whowin[k];
+                }
+                if(full == size*size){
+                        return  1;
+                }else return 0;  
+        }
+
         @Override
         protected void paintComponent(Graphics graph){
                 super.paintComponent(graph);
                 graph.clearRect(0, 0, getWidth(), getHeight());
                 drawGrid(graph);
                 drawXO(graph);
+                drawTurn(graph);
         }
 
         void drawGrid(Graphics graph){
@@ -97,12 +163,6 @@ public class TicTacToe extends JComponent/*implements ActionListener*/{
                         graph.drawLine(x*i, f+space, x*i, h-space);
                         graph.drawLine(space, f+y*i, w-space, f+y*i);
                 }
-                System.out.println("x="+x);
-                System.out.println("y="+y);
-                System.out.println("w="+w);
-                System.out.println("h="+h);
-                System.out.println("f="+f);
-                System.out.println("space="+space);
         }
 } 
 
