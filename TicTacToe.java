@@ -1,19 +1,18 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import java.io.*;
-
 
 public class TicTacToe extends JComponent{
         public static final int FIELD_EMPTY = 0;
         public static final int FIELD_X = 1;
         public static final int FIELD_O = -1;
-        public static final int size = 3;
+        int size = 4;
         public static final int IMAGE_SIZE = 128;
         int full;
         int[][] field;
         int[] whowin;
         boolean isXturn;
+
         public TicTacToe(){
                 enableEvents(AWTEvent.MOUSE_EVENT_MASK);
                 field = new int[size][size];
@@ -48,12 +47,21 @@ public class TicTacToe extends JComponent{
                         int i = (int)((float)x/getWidth()*size);
                         int j = ((int)((float)y/(getHeight()*5/6)*size));
                         if(field[i][j] == FIELD_EMPTY){
-                                field[i][j] = isXturn?FIELD_X:FIELD_O;    
+                                field[i][j] = isXturn?FIELD_X:FIELD_O; 
+                                full++;  
+                                whowin[i] += isXturn?FIELD_X:FIELD_O;
+                                whowin[size+j] += isXturn?FIELD_X:FIELD_O;
+                                if(i == j){
+                                        whowin[2*size] += isXturn?FIELD_X:FIELD_O;
+                                }
+                                if(i+j== size-1){
+                                        whowin[2*size+1] += isXturn?FIELD_X:FIELD_O;
+                                }
+
                                 isXturn = !isXturn;
-                                full++;
                                 repaint();
 
-                                win = endGame(i, j);
+                                win = endGame();
                                 if(win != 0){
                                         if(win == 3){
                                                 JOptionPane.showMessageDialog(this, "X win!", "Win!", JOptionPane.INFORMATION_MESSAGE);
@@ -72,26 +80,21 @@ public class TicTacToe extends JComponent{
         }
 
         void drawX(int x, int y, Graphics graph){
-                //graph.setColor(Color.RED);
                 int w = getWidth();
                 int h = getHeight()*5/6;
                 int f = getHeight()/6;
                 int space = ((h>w)?w:h)/30;
                 Image icon= new ImageIcon("Cross.png").getImage();
                 graph.drawImage(icon, x*w/size+space, y*h/size+f+space, (x+1)*w/size-space, (y+1)*h/size+f-space, 0, 0, IMAGE_SIZE, IMAGE_SIZE, null);
-                //graph.drawLine(x*w/size+space, y*h/size+f+space, (x+1)*w/size-space, (y+1)*h/size+f-space);
-                //graph.drawLine(x*w/size+space, (y+1)*h/size+f-space, (x+1)*w/size-space, y*h/size+f+space);
         }
 
         void drawO(int x, int y, Graphics graph){
-               // graph.setColor(Color.blue);
                 int w = getWidth();
                 int h = getHeight()*5/6;
                 int f = getHeight()/6;
                 int space = ((h>w)?w:h)/30;
                 Image icon= new ImageIcon("Zero.png").getImage();
                 graph.drawImage(icon, x*w/size+space, y*h/size+f+space, (x+1)*w/size-space, (y+1)*h/size+f-space, 0, 0, IMAGE_SIZE, IMAGE_SIZE, null);
-                //graph.drawOval((int)(x+0.5)*w/size+space/2, (int)(y+0.5)*h/size+space/2+f, w/size-space, h/size-space);
         }
 
         void drawXO(Graphics graph){
@@ -118,29 +121,43 @@ public class TicTacToe extends JComponent{
                 }
         }
 
-        int endGame(int i, int j){          
-                whowin[i] += !isXturn?FIELD_X:FIELD_O;
-                whowin[size+j] += !isXturn?FIELD_X:FIELD_O;
-                if(i == j){
-                        whowin[2*size] += !isXturn?FIELD_X:FIELD_O;
-                        if(whowin[2*size] == 3 || whowin[2*size+1] == -3){
-                                return whowin[2*size+1];
-                        }
-                }
-                if(i+j== size-1){
-                        whowin[2*size+1] += !isXturn?FIELD_X:FIELD_O;
-                        if(whowin[2*size+1] == 3 || whowin[2*size+2] == -3){
-                                return whowin[2*size+2];
-                        }
-                }
+        int endGame(){     
                 for(int k=0; k<2*size+2; k++){
                         if(whowin[k] == 3 || whowin[k] == -3)
-                       // System.out.println(whowin[k]);
                         return whowin[k];
                 }
                 if(full == size*size){
                         return  1;
                 }else return 0;  
+        }
+
+        int chackState(){
+                int diag1 = 0;
+                int diag2 = 0;
+                for(int i =0; i<size; i++){
+                        diag1 += field[i][i];
+                        diag2 += field[i][size-1-i];
+                }
+
+                if(diag1 == FIELD_O*3 || diag1 == FIELD_X*3){return diag1;}
+                if(diag2 == FIELD_O*3 || diag2 == FIELD_X*3){return diag2;}
+                int check_i, check_j;
+                boolean hasEmpty = false;
+                for(int i=0; i<size; i++){
+                        check_i = 0;
+                        check_j = 0;
+                        for(int j=0; j<size; j++){
+                                if(field[i][j] == 0){
+                                        hasEmpty = true;
+                                }
+                                check_i += field[i][j];
+                                check_j += field[j][i];
+                        }
+                
+                        if(check_i == FIELD_O*3 || check_i == FIELD_X*3){return check_i;}
+                        if(check_j == FIELD_O*3 || check_j == FIELD_X*3){return check_j;}
+                }
+                if(hasEmpty) return 0; else return -1;
         }
 
         @Override
