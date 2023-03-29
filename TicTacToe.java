@@ -6,7 +6,7 @@ public class TicTacToe extends JComponent{
         public static final int FIELD_EMPTY = 0;
         public static final int FIELD_X = 1;
         public static final int FIELD_O = -1;
-        int size = 4;
+        int size = 3;
         public static final int IMAGE_SIZE = 128;
         int full;
         int[][] field;
@@ -129,35 +129,6 @@ public class TicTacToe extends JComponent{
                 if(full == size*size){
                         return  1;
                 }else return 0;  
-        }
-
-        int chackState(){
-                int diag1 = 0;
-                int diag2 = 0;
-                for(int i =0; i<size; i++){
-                        diag1 += field[i][i];
-                        diag2 += field[i][size-1-i];
-                }
-
-                if(diag1 == FIELD_O*3 || diag1 == FIELD_X*3){return diag1;}
-                if(diag2 == FIELD_O*3 || diag2 == FIELD_X*3){return diag2;}
-                int check_i, check_j;
-                boolean hasEmpty = false;
-                for(int i=0; i<size; i++){
-                        check_i = 0;
-                        check_j = 0;
-                        for(int j=0; j<size; j++){
-                                if(field[i][j] == 0){
-                                        hasEmpty = true;
-                                }
-                                check_i += field[i][j];
-                                check_j += field[j][i];
-                        }
-                
-                        if(check_i == FIELD_O*3 || check_i == FIELD_X*3){return check_i;}
-                        if(check_j == FIELD_O*3 || check_j == FIELD_X*3){return check_j;}
-                }
-                if(hasEmpty) return 0; else return -1;
         }
 
         @Override
